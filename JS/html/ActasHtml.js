@@ -1,4 +1,5 @@
 import FbActas from '../firebase/Actas.js'
+import verDetalleMesa from './DetalleActas.js';
 const obtenerValor = (idSelec)=>{
     const select = document.getElementById(idSelec);
     return select.options[select.selectedIndex].text;
@@ -61,6 +62,47 @@ const getLocalesVotacion = async()=>{
     }
     )
 }
+const getGruposByLocal = async () => {
+    const ambito = obtenerValor("cdgoAmbito");
+    const idLocal = document.getElementById("actas_ubigeo").value;
+    const grupos = await FbActas.getGruposByLocal(idLocal, ambito);
+    const divGrupos = document.getElementById("page-wrap");
+    
+    divGrupos.innerHTML = "";
+
+    const tabla = document.createElement("table");
+    tabla.className = "table17";
+    const tbody = document.createElement("tbody");
+
+    let filas = [];
+    for (let i = 0; i < grupos.length; i += 10) {
+        filas.push(grupos.slice(i, i + 10));
+    }
+
+    filas.map(fila => {
+        const tr = document.createElement("tr");
+        fila.map(grupo => {
+            const td = document.createElement("td");
+            td.style.cursor = "pointer";
+            td.onclick = () => verDetalleMesa(grupo.idGrupo);
+            
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = grupo.idGrupo;
+            
+            td.appendChild(a);
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    tabla.appendChild(tbody);
+    divGrupos.appendChild(tabla);
+};
+document.getElementById("actas_ubigeo").addEventListener("click", () => {
+    getGruposByLocal();
+});
+
 document.getElementById("cdgoDist").addEventListener("change",()=>{
     getLocalesVotacion()
 })    
